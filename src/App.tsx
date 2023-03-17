@@ -66,7 +66,7 @@ function App() {
       setHits([...hits, [x, y]]);
 
       if (hittedShips?.[currentShipType]) {
-        setHittedShips({ ...hittedShips, [shipType]: hittedShips?.[currentShipType] + 1 });
+        setHittedShips({ ...hittedShips, [shipType]: hittedShips[currentShipType] + 1 });
       } else {
         setHittedShips({ ...hittedShips, [shipType]: 1 })
       };
