@@ -1,6 +1,6 @@
 import Hit from "../assets/hit.png";
 import Hit_Miss from "../assets/hit_miss.png";
-import { CellProps, ScreenMode } from "../types/types";
+import { CellProps } from "../types/types";
 
 interface Props {
   board: Array<CellProps[]>;
@@ -9,18 +9,17 @@ interface Props {
   hits: Array<number[]>;
   misses: Array<number[]>;
   onCellClick: (cell: CellProps) => void;
-  screenMode: ScreenMode;
+  isTablet: boolean;
+  isMobile: boolean;
 }
 
-export const Board: React.FC<Props> = ({ board, boardWidth, boardRef, onCellClick, hits, misses, screenMode }) => {
+export const Board: React.FC<Props> = ({ board, boardWidth, boardRef, onCellClick, hits, misses, isTablet, isMobile }) => {
   const cellWidth = boardWidth / board?.length;
-  const isMobile = screenMode === ScreenMode.MOBILE;
-  const isTablet = screenMode === ScreenMode.TABLET;
 
   return (
     <div className={isTablet ? "board-container-tablet" : isMobile ? "board-container-mobile" : "board-container"}>
       <div className="board" ref={boardRef}>
-        {(board || []).map((row, rowIndex) => (
+        {board.map((row, rowIndex) => (
           <div key={rowIndex} className="board-row">
             {row.map((cell, cellIndex) => {
               const isHit = (hits || []).filter((hitsValue: number[]) => hitsValue[0] === cell.x && hitsValue[1] === cell.y);

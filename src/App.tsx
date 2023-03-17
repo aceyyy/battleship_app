@@ -3,40 +3,25 @@ import { Header } from './components/Header';
 import { Stats } from './components/Stats';
 import { Board } from './components/Board';
 import { mockResponse } from './mocks/mockResponse';
-import { CellProps, ScreenMode, ShipResponse, ShipType } from './types/types';
+import { CellProps, HittedShips, ScreenMode, ShipResponse, ShipType } from './types/types';
+import { isScreenModeMobile, isScreenModeTablet, setValueFromScreenMode } from './utils/utils';
 import './App.css';
-
-
-
-export type HittedShips = Record<ShipType, number>;
-
-const hittedShipsInitialize = {} as HittedShips;
 
 const boardSize = 10;
 
-const setDefaultValueFromScreenMode = (isBoardWidth: boolean) => {
-  const width = window.innerWidth;
-
-  if (width < 900) {
-    return isBoardWidth ? window.innerWidth - 40 : ScreenMode.MOBILE;
-  } else if (width < 1200) {
-    return isBoardWidth ? window.innerWidth - 131 : ScreenMode.TABLET;
-  } else {
-    return isBoardWidth ? window.innerWidth - 690 : ScreenMode.DESKTOP;
-  }
-};
+const hittedShipsInitialize = {} as HittedShips;
 
 function App() {
-  const [screenMode, setScreenMode] = useState<ScreenMode>(setDefaultValueFromScreenMode(false) as ScreenMode);
-  const [boardWidth, setBoardWidth] = useState<number>(setDefaultValueFromScreenMode(true) as number);
+  const [screenMode, setScreenMode] = useState<ScreenMode>(setValueFromScreenMode(false) as ScreenMode);
+  const [boardWidth, setBoardWidth] = useState<number>(setValueFromScreenMode(true) as number);
   const [hits, setHits] = useState<Array<number[]>>([]);
   const [misses, setMisses] = useState<Array<number[]>>([]);
   const [hittedShips, setHittedShips] = useState<HittedShips>(hittedShipsInitialize);
 
   const boardRef = useRef<HTMLDivElement>(null);
 
-  const isDesktop = screenMode === ScreenMode.DESKTOP;
-  const isMobile = screenMode === ScreenMode.MOBILE;
+  const isTablet = isScreenModeTablet(screenMode);
+  const isMobile = isScreenModeMobile(screenMode);
 
   const data: ShipResponse = (mockResponse);
   const { shipTypes, layout } = data;
@@ -45,8 +30,10 @@ function App() {
 
   const generateBoard = useCallback(() => {
     const newBoard = [];
+
     for (let i = 0; i < boardSize; i++) {
       const newRow = [];
+
       for (let j = 0; j < boardSize; j++) {
         newRow.push({
           x: j,
@@ -55,6 +42,7 @@ function App() {
           shipType: "",
         });
       }
+
       newBoard.push(newRow);
     }
 
@@ -97,15 +85,8 @@ function App() {
       }
     }
 
-    const currentScreenWidth = window.innerWidth;
-
-    if (currentScreenWidth < 900) {
-      setScreenMode(ScreenMode.MOBILE);
-    } else if (currentScreenWidth < 1300) {
-      setScreenMode(ScreenMode.TABLET);
-    } else {
-      setScreenMode(ScreenMode.DESKTOP);
-    }
+    const valueFromScreenMode = setValueFromScreenMode(false) as ScreenMode;
+    setScreenMode(valueFromScreenMode);
   };
 
   const resetGame = useCallback(() => {
@@ -119,11 +100,11 @@ function App() {
     if (shipTotalSize === hits.length) {
       // set a delay to mark the last hitted battleship
       setTimeout(() => {
-        alert(`PLAYER 1 SCORE: ${misses.length}\nPLAYER 2 SCORE: 0\nGAME OVER!`);
+        alert("GAME OVER!");
         resetGame();
-      }, 300);
+      }, 100);
     }
-  }, [hits.length, misses.length, shipTotalSize, resetGame])
+  }, [hits.length, shipTotalSize, resetGame])
 
   useEffect(() => {
     window.addEventListener('resize', updateBoardWidth);
@@ -135,25 +116,7 @@ function App() {
   return (
     <div className="App">
       <Header screenMode={screenMode} />
-      {isDesktop ? (
-        <div className="content-container-desktop">
-          <Stats
-            shipTypes={shipTypes}
-            hittedShips={hittedShips}
-            misses={misses}
-            screenMode={screenMode}
-          />
-          <Board
-            board={board}
-            boardWidth={boardWidth}
-            boardRef={boardRef}
-            hits={hits}
-            misses={misses}
-            onCellClick={onCellClick}
-            screenMode={screenMode}
-          />
-        </div>
-      ) : (
+      {isMobile || isTablet ? (
         <div className={isMobile ? "content-container-mobile" : "content-container-tablet"}>
           <Board
             board={board}
@@ -162,13 +125,35 @@ function App() {
             hits={hits}
             misses={misses}
             onCellClick={onCellClick}
-            screenMode={screenMode}
+            isTablet={isTablet}
+            isMobile={isMobile}
           />
           <Stats
             shipTypes={shipTypes}
             hittedShips={hittedShips}
+            hits={hits}
+            isTablet={isTablet}
+            isMobile={isMobile}
+          />
+        </div>
+      ) : (
+        <div className="content-container-desktop">
+          <Stats
+            shipTypes={shipTypes}
+            hittedShips={hittedShips}
+            hits={hits}
+            isTablet={isTablet}
+            isMobile={isMobile}
+          />
+          <Board
+            board={board}
+            boardWidth={boardWidth}
+            boardRef={boardRef}
+            hits={hits}
             misses={misses}
-            screenMode={screenMode}
+            onCellClick={onCellClick}
+            isTablet={isTablet}
+            isMobile={isMobile}
           />
         </div>
       )}

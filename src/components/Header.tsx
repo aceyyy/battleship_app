@@ -1,11 +1,12 @@
 import { ScreenMode } from "../types/types";
+import { isScreenModeDesktop } from "../utils/utils";
 
 interface Props {
   screenMode: ScreenMode;
 }
 
 export const Header: React.FC<Props> = ({ screenMode }) => {
-  const isDesktop = screenMode === ScreenMode.DESKTOP;
+  const isDesktop = isScreenModeDesktop(screenMode);
 
   return (
     <div className={isDesktop ? "header-container-desktop" : "header-container-mobile-tablet"}>

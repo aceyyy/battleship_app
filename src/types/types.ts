@@ -33,3 +33,5 @@ export interface ShipResponse {
   shipTypes: Record<ShipType, ShipSizeCount>;
   layout: ShipLayout[];
 }
+
+export type HittedShips = Record<ShipType, number>;
